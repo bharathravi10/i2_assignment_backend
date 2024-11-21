@@ -27,5 +27,11 @@ import {
     getProfile(@Request() req) {
       return req.user;
     }
+
+    @UseGuards(AuthGuard)
+    @Get('user-data')
+    getUserData(@Request() req) {
+      return this.authService.userData(req.user.email)
+    }
   }
   

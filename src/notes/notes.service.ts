@@ -11,8 +11,8 @@ export class NotesService {
     return createdNotes.save();
   }
 
-  async getAllnotes(): Promise<Notes[]> {
-    return this.NotesModel.find().exec();
+  async getAllnotes(userId: string): Promise<Notes[]> {
+    return this.NotesModel.find({ user_id: userId }).exec();
   }
   // gwt a note by user_id and note_id (_id)
   async getNoteByUserIdAndNoteId(userId: string, noteId: string): Promise<any> {
@@ -65,6 +65,6 @@ export class NotesService {
       );
     }
 
-    return `Note with user_id ${userId} and note_id ${noteId} has been deleted successfully.`;
+    return 'Note deleted successfully';
   }
 }

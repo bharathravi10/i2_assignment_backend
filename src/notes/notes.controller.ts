@@ -6,48 +6,53 @@ import {
   Param,
   Post,
   Put,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { Notes } from 'src/schemas/notes.schema';
+import { AuthGuard } from 'src/auth/auth.guard.ts';
 
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
-
+  @UseGuards(AuthGuard)
   @Post('add')
-  async createNote(@Body() createNotesDto: any): Promise<Notes> {
-    return this.notesService.createNotes(createNotesDto);
+  async createNote(@Body() createNotesDto: any, @Request() req,): Promise<Notes> {
+    return this.notesService.createNotes({...createNotesDto, user_id: req.user.user_id});
   }
 
-  @Put('update/:userId/:noteId')
+  @UseGuards(AuthGuard)
+  @Put('update/:noteId')
   async updateNote(
-    @Param('userId') userId: string,
+    @Request() req,
     @Param('noteId') noteId: string,
     @Body() updateData: any,
   ): Promise<Notes> {
     // Pass both userId and noteId to the service method
-    return this.notesService.updateNoteByUserId(userId, noteId, updateData);
+    return this.notesService.updateNoteByUserId(req.user.user_id, noteId, updateData);
   }
   // implement to get a single note
-  @Get('singleNote/:userId/:noteId')
-  async getNote(
-    @Param('userId') userId: string,
+  @UseGuards(AuthGuard)
+  @Get('singleNote/:noteId')
+  async getNote(@Request() req,
     @Param('noteId') noteId: string,
   ): Promise<Notes> {
-    return this.notesService.getNoteByUserIdAndNoteId(userId, noteId);
+    return this.notesService.getNoteByUserIdAndNoteId(req.user.user_id, noteId);
   }
-
+  @UseGuards(AuthGuard)
   @Get()
-  getAllNote(): Promise<Notes[]> {
-    return this.notesService.getAllnotes();
+  getAllNote(@Request() req): Promise<Notes[]> {
+    return this.notesService.getAllnotes(req.user.user_id);
   }
 
   // Delete a note by both user_id and note_id
-  @Delete('delete/:userId/:noteId')
+  @UseGuards(AuthGuard)
+  @Delete('delete/:noteId')
   async deleteNote(
-    @Param('userId') userId: string,
+    @Request() req,
     @Param('noteId') noteId: string,
   ): Promise<string> {
-    return this.notesService.deleteNoteByUserIdAndNoteId(userId, noteId);
+    return this.notesService.deleteNoteByUserIdAndNoteId(req.user.user_id, noteId);
   }
 }
